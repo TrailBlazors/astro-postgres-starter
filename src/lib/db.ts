@@ -9,12 +9,16 @@ if (!connectionString) {
 // Create PostgreSQL connection
 export const sql = postgres(connectionString, {
   ssl: 'require',
-  onnotice: () => {}, // Suppress notices
+  max: 10,
+  idle_timeout: 20,
+  connect_timeout: 10,
 });
 
 // Initialize database tables
 export async function initDatabase() {
   try {
+    console.log('Starting database initialization...');
+    
     await sql`
       CREATE TABLE IF NOT EXISTS posts (
         id SERIAL PRIMARY KEY,
@@ -28,10 +32,17 @@ export async function initDatabase() {
         created_at TIMESTAMP DEFAULT NOW()
       );
     `;
+    
+    console.log('Posts table created/verified');
 
     // Seed with example post if empty
-    const posts = await sql`SELECT COUNT(*) FROM posts`;
-    if (posts[0].count === '0') {
+    const result = await sql`SELECT COUNT(*)::int as count FROM posts`;
+    const count = result[0].count;
+    
+    console.log(`Found ${count} posts in database`);
+    
+    if (count === 0) {
+      console.log('Seeding initial post...');
       await sql`
         INSERT INTO posts (title, description, content, author, slug, hero_image)
         VALUES (
@@ -43,13 +54,18 @@ export async function initDatabase() {
           'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800'
         )
       `;
+      console.log('Initial post seeded successfully');
     }
     
-    console.log('Database initialized successfully');
+    console.log('Database initialization complete!');
   } catch (error) {
     console.error('Database initialization error:', error);
+    throw error; // Re-throw to see the full error
   }
 }
 
-// Auto-initialize on production start
-initDatabase().catch(console.error);
+// Auto-initialize on server start
+console.log('Initializing database on startup...');
+initDatabase()
+  .then(() => console.log('Database ready!'))
+  .catch(err => console.error('Failed to initialize database:', err));
