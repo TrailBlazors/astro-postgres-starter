@@ -4,7 +4,7 @@
 
 Build lightning-fast websites with dynamic content from a real database. Perfect for blogs, documentation sites, portfolios, and content-heavy applications that need the speed of static sites with database-driven content.
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/TEMPLATE_ID)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/astro-postgresql?referralCode=Ce0gB7&utm_medium=integration&utm_source=template&utm_campaign=generic)
 
 ## ✨ Features
 
