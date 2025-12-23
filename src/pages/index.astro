@@ -1,11 +1,106 @@
 ---
-import Welcome from '../components/Welcome.astro';
+import { sql } from '../lib/db';
 import Layout from '../layouts/Layout.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const posts = await sql`
+  SELECT id, title, description, author, pub_date, hero_image, slug
+  FROM posts
+  ORDER BY pub_date DESC
+  LIMIT 3
+`;
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Home">
+  <main class="container mx-auto px-4 py-12 max-w-6xl">
+    <!-- Hero Section -->
+    <section class="text-center mb-16">
+      <h1 class="text-6xl font-bold mb-4">
+        ⚡ Astro + PostgreSQL
+      </h1>
+      <p class="text-xl text-gray-600 mb-8">
+        Build blazing fast websites with a real database
+      </p>
+      <div class="flex gap-4 justify-center">
+        <a 
+          href="/blog" 
+          class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold"
+        >
+          View Blog
+        </a>
+        <a 
+          href="https://github.com/YOUR_USERNAME/astro-postgres-starter" 
+          class="px-6 py-3 border-2 border-gray-300 rounded-lg hover:border-gray-400 transition font-semibold"
+        >
+          GitHub
+        </a>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="grid md:grid-cols-3 gap-8 mb-16">
+      <div class="text-center p-6">
+        <div class="text-4xl mb-4">🚀</div>
+        <h3 class="text-xl font-bold mb-2">Lightning Fast</h3>
+        <p class="text-gray-600">Astro ships zero JS by default for instant page loads</p>
+      </div>
+      
+      <div class="text-center p-6">
+        <div class="text-4xl mb-4">🐘</div>
+        <h3 class="text-xl font-bold mb-2">PostgreSQL Powered</h3>
+        <p class="text-gray-600">Production-ready database with dynamic content</p>
+      </div>
+      
+      <div class="text-center p-6">
+        <div class="text-4xl mb-4">🎨</div>
+        <h3 class="text-xl font-bold mb-2">Tailwind Styled</h3>
+        <p class="text-gray-600">Beautiful, responsive design out of the box</p>
+      </div>
+    </section>
+
+    <!-- Recent Posts -->
+    <section>
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-bold">Recent Posts</h2>
+        <a href="/blog" class="text-blue-600 hover:underline">View all →</a>
+      </div>
+      
+      <div class="grid gap-8 md:grid-cols-3">
+        {posts.map((post) => (
+          <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition">
+            {post.hero_image && (
+              <img 
+                src={post.hero_image} 
+                alt={post.title}
+                class="w-full h-48 object-cover"
+              />
+            )}
+            
+            <div class="p-6">
+              <h3 class="text-xl font-bold mb-2">
+                <a href={`/blog/${post.slug}`} class="hover:text-blue-600 transition">
+                  {post.title}
+                </a>
+              </h3>
+              
+              {post.description && (
+                <p class="text-gray-600 mb-4 line-clamp-2">{post.description}</p>
+              )}
+              
+              <div class="flex items-center gap-2 text-sm text-gray-500">
+                <span>{post.author}</span>
+                <span>•</span>
+                <time>{new Date(post.pub_date).toLocaleDateString()}</time>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {posts.length === 0 && (
+        <div class="text-center py-12">
+          <p class="text-xl text-gray-600">No posts yet. Deploy to Railway to get started!</p>
+        </div>
+      )}
+    </section>
+  </main>
 </Layout>

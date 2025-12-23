@@ -1,0 +1,52 @@
+---
+import { sql } from '../../lib/db';
+import Layout from '../../layouts/Layout.astro';
+
+const { slug } = Astro.params;
+
+const posts = await sql`
+  SELECT * FROM posts WHERE slug = ${slug}
+`;
+
+const post = posts[0];
+
+if (!post) {
+  return Astro.redirect('/404');
+}
+---
+
+<Layout title={post.title}>
+  <main class="container mx-auto px-4 py-8 max-w-4xl">
+    <article>
+      {post.hero_image && (
+        <img 
+          src={post.hero_image} 
+          alt={post.title}
+          class="w-full h-96 object-cover rounded-lg mb-8"
+        />
+      )}
+      
+      <h1 class="text-4xl font-bold mb-4">{post.title}</h1>
+      
+      <div class="flex items-center gap-4 text-gray-600 mb-8">
+        <span>By {post.author}</span>
+        <span>•</span>
+        <time>{new Date(post.pub_date).toLocaleDateString()}</time>
+      </div>
+
+      {post.description && (
+        <p class="text-xl text-gray-700 mb-8">{post.description}</p>
+      )}
+
+      <div class="prose prose-lg max-w-none">
+        <p class="whitespace-pre-wrap">{post.content}</p>
+      </div>
+
+      <div class="mt-12">
+        <a href="/blog" class="text-blue-600 hover:underline">
+          ← Back to all posts
+        </a>
+      </div>
+    </article>
+  </main>
+</Layout>
